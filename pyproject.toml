@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+[project]
+# dynamic = ["version"]
+version = "0.0.1"
+name = "dbt-random-generator"
+dependencies = [
+    "dbt-core",
+    "sqlglot[rs]",
+    "Faker",
+    "networkx[default]",
+]
+[project.optional-dependencies]
+clickhouse = [
+    "dbt-clickhouse"
+]
+postgres = [
+    "dbt-postgres"
+]
+bigquery = [
+    "dbt-bigquery"
+]
