@@ -27,7 +27,14 @@ class Transformation(Generic[F]):
     arity: tuple[int, int]
     arguments: Sequence[ArgTypeConfig]
     # if "None", returns main_type
-    returns: SQLType | None = None
+    _returns: SQLType | None = None
+
+    @property 
+    def return_type(self) -> SQLType:
+        if self._returns is None:
+            return self.main_type
+        else:
+            return self._returns 
 
     @property
     def name(self) -> str:
