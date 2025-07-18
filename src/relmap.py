@@ -18,16 +18,17 @@ class Relmap(Graph):
         for column in columns: 
             self.connect_table_and_column(table, column)
     
+    def get_all_tables(self, kind:str|None=None) -> list[Table]:
+        return [i for i in self.nodes if isinstance(i, Table) and (kind is None or i.kind == kind)]
 
-    def __init__(self, 
+    
+    def generate_random_seeds(self, 
                  number_of_seeds:int=1,
                  pk_n_min:int=1,
                  pk_n_max:int=1,
                  fields_n_min:int=2,
-                 fields_n_max:int=5
-                 ):
-        super()
-        for _ in number_of_seeds:
+                 fields_n_max:int=5):
+        for _ in range(number_of_seeds):
             seed_and_columns = generate_seed(
                 pk_n=randint(pk_n_min, pk_n_max),
                 fields_n_min=fields_n_min,
