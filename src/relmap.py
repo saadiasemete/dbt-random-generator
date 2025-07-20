@@ -3,6 +3,8 @@ from .column import Column
 from .table import Table
 from .randomness import generate_seed
 from random import randint
+from .transformation_metadata import TransformationMetadata
+from .utils import randstr
 
 class Relmap(Graph):
 
@@ -21,6 +23,23 @@ class Relmap(Graph):
     def get_all_tables(self, kind:str|None=None) -> list[Table]:
         return [i for i in self.nodes if isinstance(i, Table) and (kind is None or i.kind == kind)]
 
+    def apply_transformation(self, transformation_metadata: TransformationMetadata):
+
+        transformation_instance = transformation_metadata.transformation()
+        resulting_column = transformation_metadata.resulting_column
+
+        self.add_node(transformation_instance)
+        for column in transformation_metadata.columns:
+            # old col <-> transformation
+            self.add_edge(column, transformation_instance, label='goes_to')
+            self.add_edge(transformation_instance, column, label='argument')
+        
+        self.add_node(resulting_column)
+        # new_col <-> transformation
+        self.add_edge(resulting_column, transformation_instance, label='made_of')
+        self.add_edge(transformation_instance, resulting_column, label='makes')
+        # new_col <-> new_table
+        self.connect_table_and_column(transformation_metadata.new_table, resulting_column)
     
     def generate_random_seeds(self, 
                  number_of_seeds:int=1,

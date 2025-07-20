@@ -1,6 +1,10 @@
-from src.table import Table
+from src import Relmap, propagate
 
 
-seed = Table.generate_seed()
-graph = Table.generate_seed().represent_as_graph()
-print(graph)
+for i in range(100):
+    graph = Relmap()
+    graph.generate_random_seeds()
+    propagate(graph)
+
+    assert len(graph.get_all_tables()) == 2
+    print(f'OK: {i}')
