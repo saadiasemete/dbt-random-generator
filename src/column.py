@@ -22,10 +22,12 @@ class Column:
     def __hash__(self):
         return hash(self.full_name)
     
-    def to_sqlglot_column(self):
+    def to_sqlglot_column(self, alias:str|None=None):
+        if alias is None: 
+            alias = self.table.name
         return exp.Column(
             this=exp.Identifier(this=self.name),
-            table=exp.Identifier(this=self.table.name)
+            table=exp.Identifier(this=alias)
         )
     
     @classmethod 
