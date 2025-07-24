@@ -63,7 +63,7 @@ def create_transformations(graph: Relmap, related_columns: list[Column], new_tab
                 resulting_column=Column(
                     name=randstr(),
                     type=transformation.return_type,
-                    table_name=new_table.name
+                    table=new_table
                 ),
                 new_table=new_table
             )

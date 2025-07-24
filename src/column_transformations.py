@@ -47,9 +47,20 @@ class Transformation(Generic[F]):
     @property
     def is_var_len_args(self) -> bool:
         return self.fn.is_var_len_args
+    
+    def build_expr(self, args):
+        if issubclass(self.fn, exp.Func):
+            if hasattr(self.fn, "arg_types") and "expressions" in self.fn.arg_types:
+                return self.fn(expressions=args)
+            elif "this" in self.fn.arg_types:
+                return self.fn(this=args[0])
+        raise ValueError(f"Don't know how to handle {self.fn}")
+    
+    
 
 class tr_Least(Transformation[exp.Least]):
 
+    fn = exp.Least
     arity = (2, 2)
     main_type_bounds = [SQLType.INT, SQLType.FLOAT]
     arguments = [
@@ -59,6 +70,7 @@ class tr_Least(Transformation[exp.Least]):
 
 class tr_Greatest(Transformation[exp.Greatest]):
 
+    fn = exp.Greatest
     arity = (2, 2)
     main_type_bounds = [SQLType.INT, SQLType.FLOAT]
     arguments = [
@@ -68,6 +80,7 @@ class tr_Greatest(Transformation[exp.Greatest]):
 
 class tr_Concat(Transformation[exp.Concat]):
 
+    fn = exp.Concat
     arity = (2, 0)
     main_type_bounds = [SQLType.STRING]
     arguments = [
@@ -76,6 +89,8 @@ class tr_Concat(Transformation[exp.Concat]):
     ]
 
 class tr_Length(Transformation[exp.Length]):
+
+    fn = exp.Length
     arity = (1,1)
     main_type_bounds = [SQLType.STRING]
     arguments = [

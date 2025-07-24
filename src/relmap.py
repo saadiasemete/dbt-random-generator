@@ -1,7 +1,9 @@
 from networkx import Graph
 from .column import Column
+from .constant import Constant
 from .table import Table
 from .randomness import generate_seed
+from .column_transformations import Transformation
 from random import randint
 from .transformation_metadata import TransformationMetadata
 from .utils import randstr
@@ -22,6 +24,22 @@ class Relmap(Graph):
     
     def get_all_tables(self, kind:str|None=None) -> list[Table]:
         return [i for i in self.nodes if isinstance(i, Table) and (kind is None or i.kind == kind)]
+
+    def get_model_columns(self, model:Table) -> list[Column]:
+        columns: list[Column] = []
+        for node in self.nodes: 
+            if isinstance(node, Column) and self.has_edge(model, node) and self.edges[(model,node)]['label'] == 'makes_up':
+                columns.append(node)
+        return columns
+    
+    def get_creating_transformation(self, column: Column) -> Transformation:
+        print([i for i, j in self[column].items() if j['label'] == 'makes'])
+        return [i for i, j in self[column].items() if j['label'] == 'makes'][0]
+
+    
+    def get_transformation_arguments(self, transformation: Transformation) -> list[Column|Constant]:
+        return [i for i, j in self[transformation].items() if j['label'] == 'argument']
+
 
     def apply_transformation(self, transformation_metadata: TransformationMetadata):
 
