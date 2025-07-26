@@ -48,12 +48,12 @@ class Transformation(Generic[F]):
     def is_var_len_args(self) -> bool:
         return self.fn.is_var_len_args
     
-    def build_expr(self, args):
+    def build_expr(self, args: list, alias: str) -> exp.Func:
         if issubclass(self.fn, exp.Func):
             if hasattr(self.fn, "arg_types") and "expressions" in self.fn.arg_types:
-                return self.fn(expressions=args)
+                return self.fn(expressions=args).as_(alias)
             elif "this" in self.fn.arg_types:
-                return self.fn(this=args[0])
+                return self.fn(this=args[0]).as_(alias)
         raise ValueError(f"Don't know how to handle {self.fn}")
     
     

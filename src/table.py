@@ -15,6 +15,11 @@ class Table:
     
     def __hash__(self):
         return hash(self.name)
+    
+    def dbt_ref(self):
+
+        ref_components = ["{{ ref('", self.name, "') }}",]
+        return ''.join(ref_components)
 
 
         
