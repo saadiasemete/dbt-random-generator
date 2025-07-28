@@ -1,18 +1,34 @@
-from .column import Column 
-from .table import Table
-from .utils import randstr
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .column import Column 
+    from .table import Table
 import random 
+from .settings import SQLType, SUPPORTED_TYPES
 
-def generate_seed(pk_n: int=1, fields_n_min: int=2, fields_n_max: int=5):
-    fields_n = random.randint(fields_n_min, fields_n_max)
-    table_name = randstr()
-    columns = list()
-    seed_table = Table(name=table_name,kind='seed',)
-    for _ in range(pk_n):
-        columns.append(Column.generate_field(seed_table, is_pk=True))
-    for _ in range(fields_n):
-        columns.append(Column.generate_field(seed_table, is_pk=False))
+def generate_random_letter():
+    A = 65 
+    Z = 90
+    a = 97
+    z = 122
+    return chr(random.choice([random.randint(A, Z), random.randint(a, z)]))
+
+def randstr(len: int=16) -> str:
+    return ''.join(generate_random_letter() for _ in range(len))
+
+def generate_field_name_type(types: list[SQLType]=SUPPORTED_TYPES):
     return {
-        'table': seed_table,
-        'columns': columns
+        'name': randstr(),
+        'type': random.choice(types),
     }
+
+def random_piece_of_data(type_: SQLType):
+    match type_:
+        case SQLType.STRING:
+            return randstr()
+        case SQLType.INT:
+            return random.randint(-127, 128)
+        case SQLType.FLOAT:
+            return random_piece_of_data(SQLType.INT)*random.random()
+        case _:
+            raise NotImplementedError(type_)
+

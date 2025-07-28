@@ -1,5 +1,5 @@
-from .settings import PK_TYPES, SUPPORTED_TYPES
-from .utils import randstr
+from .settings import PK_TYPES, SUPPORTED_TYPES, SQLType
+from .randomness import randstr
 import random
 from typing import TYPE_CHECKING
 from sqlglot import exp
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from .table import Table
 
 class Column:
-    def __init__(self, name: str, type: str, table: 'Table', is_pk: bool=False, **kwargs):
+    def __init__(self, name: str, type: SQLType, table: 'Table', is_pk: bool=False, **kwargs):
         self.name = name 
         self.type = type 
         self.table = table

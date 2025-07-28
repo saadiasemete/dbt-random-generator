@@ -2,11 +2,10 @@ from networkx import Graph
 from .column import Column
 from .constant import Constant
 from .table import Table
-from .randomness import generate_seed
 from .column_transformations import Transformation
 from random import randint
 from .transformation_metadata import TransformationMetadata
-from .utils import randstr
+from .randomness import randstr
 
 class Relmap(Graph):
 
@@ -47,10 +46,10 @@ class Relmap(Graph):
         resulting_column = transformation_metadata.resulting_column
 
         self.add_node(transformation_instance)
-        for column in transformation_metadata.columns:
+        for arg in transformation_metadata.args:
             # old col <-> transformation
-            self.add_edge(column, transformation_instance, label='goes_to')
-            self.add_edge(transformation_instance, column, label='argument')
+            self.add_edge(arg, transformation_instance, label='goes_to')
+            self.add_edge(transformation_instance, arg, label='argument')
         
         self.add_node(resulting_column)
         # new_col <-> transformation
@@ -59,6 +58,8 @@ class Relmap(Graph):
         # new_col <-> new_table
         self.connect_table_and_column(transformation_metadata.new_table, resulting_column)
     
+    
+    
     def generate_random_seeds(self, 
                  number_of_seeds:int=1,
                  pk_n_min:int=1,
@@ -66,7 +67,7 @@ class Relmap(Graph):
                  fields_n_min:int=2,
                  fields_n_max:int=5):
         for _ in range(number_of_seeds):
-            seed_and_columns = generate_seed(
+            seed_and_columns = Table.generate_seed(
                 pk_n=randint(pk_n_min, pk_n_max),
                 fields_n_min=fields_n_min,
                 fields_n_max=fields_n_max

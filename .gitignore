@@ -208,3 +208,7 @@ __marimo__/
 
 # ipynbs that i use for experimenting with libraries
 # *.ipynb
+
+
+# output
+output/

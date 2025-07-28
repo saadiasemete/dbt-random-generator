@@ -1,8 +1,10 @@
 from .table import Table, Column
 from .column_transformations import Transformation
 from .settings import SQLType
-from .utils import randstr
+from .randomness import randstr, random_piece_of_data
+from .constant import Constant
 from .relmap import Relmap
+from copy import deepcopy
 import random 
 
 from .transformation_metadata import TransformationMetadata
@@ -14,9 +16,9 @@ def select_transformation(related_columns_classified: dict[SQLType, list[Column]
                           lower_col_number:int=1, 
                           upper_col_number:int|None=None) -> tuple[Transformation, int]:
     
-    if upper_col_number is None: 
+    if upper_col_number in (None, -1, 0): 
         upper_col_number = len(related_columns_classified[type_])
-    affected_columns_nummber = random.randint(lower_col_number, upper_col_number)
+    affected_columns_number = random.randint(lower_col_number, upper_col_number)
 
     potential_transformations = []
     min_arity = 999
@@ -24,16 +26,19 @@ def select_transformation(related_columns_classified: dict[SQLType, list[Column]
 
     for t in Transformation.__subclasses__():
         if type_ in t.main_type_bounds:
-            if t.arity[0] > affected_columns_nummber or t.arity[1] != 0 and t.arity[1] < affected_columns_nummber:
+            if t.arity[0] > affected_columns_number:
                 min_arity = min(min_arity, t.arity[0])
+            elif (t.arity[1] != 0 and t.arity[1] < affected_columns_number):
                 max_arity = max(max_arity, t.arity[1])
             else:
+                assert affected_columns_number >= t.arity[0]
+                assert t.arity[1] != 0 and affected_columns_number <= t.arity[1]
                 potential_transformations.append(t)
     
     if len(potential_transformations) == 0:
         return select_transformation(related_columns_classified, type_, min_arity, max_arity)
     else:
-        return random.choice(potential_transformations), affected_columns_nummber
+        return random.choice(potential_transformations), affected_columns_number
 
 def classify_columns(related_columns: list[Column]) -> dict[SQLType, list[Column]]:
     related_columns_classified: dict[SQLType, list[Column]] = dict()
@@ -51,15 +56,26 @@ def create_transformations(graph: Relmap, related_columns: list[Column], new_tab
     related_columns_classified = classify_columns(related_columns)
 
     for _ in range(transformation_number):
+
+        main_type = random.choice([type_ for type_ in related_columns_classified])
         
-        transformation, affected_columns_nummber = select_transformation(
+        transformation, affected_columns_number = select_transformation(
             related_columns_classified,
-            random.choice([type_ for type_ in related_columns_classified])
+            main_type
             )
+        # we're gonna possibly add constants to it, but it's not a fact that we'd need them otherwise
+        population = deepcopy(related_columns_classified[main_type])
+        # TODO: add logic to make constants even when there's no necessity
+        while len(population) < affected_columns_number or False:
+            population.append(Constant(main_type, random_piece_of_data(main_type)))
+
+
+        assert len(population) >= affected_columns_number
+        assert len(population) >= transformation.arity[0]
         transformations.append(
             TransformationMetadata(
                 transformation=transformation,
-                columns=random.choices(related_columns, k=affected_columns_nummber),
+                args=random.choices(population, k=affected_columns_number),
                 resulting_column=Column(
                     name=randstr(),
                     type=transformation.return_type,
