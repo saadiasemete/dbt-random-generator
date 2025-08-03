@@ -44,13 +44,13 @@ class Relmap(Graph):
 
         transformation_instance = transformation_metadata.transformation()
         resulting_column = transformation_metadata.resulting_column
-
+        assert not self.has_node(transformation_instance)
         self.add_node(transformation_instance)
         for arg in transformation_metadata.args:
             # old col <-> transformation
             self.add_edge(arg, transformation_instance, label='goes_to')
             self.add_edge(transformation_instance, arg, label='argument')
-        
+        assert len(self.get_transformation_arguments(transformation_instance)) == len(transformation_metadata.args)
         self.add_node(resulting_column)
         # new_col <-> transformation
         self.add_edge(resulting_column, transformation_instance, label='made_of')

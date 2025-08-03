@@ -42,12 +42,12 @@ def select_transformation(related_columns_classified: dict[SQLType, list[Column]
 
     for t in Transformation.__subclasses__():
         if type_ in t.main_type_bounds:
-            if t.arity[0] > affected_columns_number:
+            if (not t.allows_const and t.arity[0] > affected_columns_number):
                 min_arity = min(min_arity, t.arity[0])
             elif (t.arity[1] != 0 and t.arity[1] < affected_columns_number):
                 max_arity = max(max_arity, t.arity[1])
             else:
-                assert not (t.arity[0] > affected_columns_number)
+                assert not (not t.allows_const and t.arity[0] > affected_columns_number)
                 assert not (t.arity[1] != 0 and t.arity[1] < affected_columns_number)
                 potential_transformations.append(t)
 
@@ -79,8 +79,18 @@ def select_type_and_transformations(related_columns_classified: dict[SQLType, li
         return select_type_and_transformations(related_columns_classified, new_table, exclude_types)
     # we're gonna possibly add constants to it, but it's not a fact that we'd need them otherwise
     population = deepcopy(related_columns_classified[main_type])
+    # if the number of arguments is less than the nuber of columns, use constants
+    affected_columns_number = max(transformation.arity[0], affected_columns_number)
     # TODO: add logic to make constants even when there's no necessity
-    while len(population) < transformation.arity[0] or False:
+    print(
+        {
+            'transformation': transformation,
+            'arity': transformation.arity,
+            'population': population,
+            'affected': affected_columns_number
+        }
+    )
+    while len(population) < affected_columns_number or False:
         population.append(
             Constant(main_type, random_piece_of_data(main_type)))
 
@@ -89,7 +99,7 @@ def select_type_and_transformations(related_columns_classified: dict[SQLType, li
     
     return TransformationMetadata(
         transformation=transformation,
-        args=random.choices(population, k=affected_columns_number),
+        args=random.sample(population, k=affected_columns_number),
         resulting_column=Column(
             name=randstr(),
             type=transformation.return_type,

@@ -28,6 +28,8 @@ class Transformation(Generic[F]):
     arguments: Sequence[ArgTypeConfig]
     # if "None", returns main_type
     _returns: SQLType | None = None
+    # if True, main_type could be of Const type
+    allows_const: bool
 
     @property 
     def return_type(self) -> SQLType:
@@ -52,7 +54,7 @@ class Transformation(Generic[F]):
         if issubclass(self.fn, exp.Func):
             if hasattr(self.fn, "arg_types") and "expressions" in self.fn.arg_types:
                 return self.fn(expressions=args).as_(alias)
-            elif "this" in self.fn.arg_types:
+            elif "this" in self.arg_types:
                 return self.fn(this=args[0]).as_(alias)
         raise ValueError(f"Don't know how to handle {self.fn}")
     
@@ -67,6 +69,7 @@ class tr_Least(Transformation[exp.Least]):
         ArgTypeConfig(types=None, constant=ConstPolicy.ALLOWED),
         ArgTypeConfig(types=None, constant=ConstPolicy.ALLOWED),
     ]
+    allows_const = True
 
 class tr_Greatest(Transformation[exp.Greatest]):
 
@@ -77,6 +80,7 @@ class tr_Greatest(Transformation[exp.Greatest]):
         ArgTypeConfig(types=None, constant=ConstPolicy.ALLOWED),
         ArgTypeConfig(types=None, constant=ConstPolicy.ALLOWED),
     ]
+    allows_const = True
 
 class tr_Concat(Transformation[exp.Concat]):
 
@@ -87,6 +91,7 @@ class tr_Concat(Transformation[exp.Concat]):
         ArgTypeConfig(types=None, constant=ConstPolicy.ALLOWED),
         ArgTypeConfig(types=[list[None]], constant=ConstPolicy.ALLOWED),
     ]
+    allows_const = True
 
 class tr_Length(Transformation[exp.Length]):
 
@@ -96,5 +101,6 @@ class tr_Length(Transformation[exp.Length]):
     arguments = [
         ArgTypeConfig(types=None, constant=ConstPolicy.ALLOWED),
     ]
+    allows_const = True
 
 

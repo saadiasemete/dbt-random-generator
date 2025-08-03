@@ -22,7 +22,7 @@ def render(model: Table, graph: Relmap) -> str:
             assert arg.type in transformation.main_type_bounds
         rendered_transformations.append(
             transformation.build_expr(
-                args=[(arg.to_sqlglot_column() if isinstance(arg, Column) else arg.value) for arg in args ],
+                args=[(arg.to_sqlglot_column() if isinstance(arg, Column) else arg.to_sqlglot_literal()) for arg in args ],
                 alias = column.name
             )
         )
