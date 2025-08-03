@@ -16,7 +16,7 @@ def render(model: Table, graph: Relmap) -> str:
         args = graph.get_transformation_arguments(
             transformation=transformation)
         assert len(args) >= transformation.arity[0]
-        assert transformation.arity[1] != 0 and len(args) <= transformation.arity[1]
+        assert transformation.arity[1] == 0 or len(args) <= transformation.arity[1]
         for arg in args:
             # TODO: use it smarter
             assert arg.type in transformation.main_type_bounds
@@ -40,4 +40,4 @@ def render(model: Table, graph: Relmap) -> str:
     ).as_(ancestor.name)
 
     # TODO: unhardcode
-    return select_expr.sql(dialect='postgres')
+    return select_expr.sql(dialect='postgres', pretty=True)

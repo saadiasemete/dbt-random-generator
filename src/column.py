@@ -26,7 +26,7 @@ class Column:
         if alias is None: 
             alias = self.table.name
         return exp.Column(
-            this=exp.Identifier(this=self.name),
+            this=exp.Identifier(this=self.name, quoted=True),
             table=exp.Identifier(this=alias)
         )
     
