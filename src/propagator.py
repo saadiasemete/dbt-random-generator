@@ -127,11 +127,16 @@ def create_transformations(graph: Relmap, related_columns: list[Column], new_tab
     #
 
 
-def propagate(graph: Relmap):
-    # TODO: allow multiple seeds
-    seed = graph.get_all_tables('seed')[0]
+def propagate(graph: Relmap, staging:bool=True):
+    if staging:
+        kind = 'seed'
+    else:
+        kind = 'model'
+    models = graph.get_all_tables(kind)
+    # TODO: allow multiple 
+    model = models[0]
     related_columns: list[Column] = [
-        col for col, col_meta in graph[seed].items() if col_meta.get('label') == 'makes_up']
+        col for col, col_meta in graph[model].items() if col_meta.get('label') == 'makes_up']
     new_table = Table(
         randstr(),
         'model',
