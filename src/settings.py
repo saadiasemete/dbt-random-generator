@@ -1,5 +1,9 @@
 from enum import Enum
 from sqlglot.dialects import postgres
+import os 
+from jinja2 import Environment, FileSystemLoader
+templates_folder = os.path.abspath('templates')  
+jinja_env = Environment(loader=FileSystemLoader('/home/mike/Documents/grimoires/dbt-random-generator/templates'))
 
 class SQLType(str, Enum):
     INT = "int"
