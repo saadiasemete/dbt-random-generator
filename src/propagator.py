@@ -126,15 +126,7 @@ def create_transformations(graph: Relmap, related_columns: list[Column], new_tab
 
     #
 
-
-def propagate(graph: Relmap, staging:bool=True):
-    if staging:
-        kind = 'seed'
-    else:
-        kind = 'model'
-    models = graph.get_all_tables(kind)
-    # TODO: allow multiple 
-    model = models[0]
+def propagate_single_model(graph: Relmap, model: Table):
     related_columns: list[Column] = [
         col for col, col_meta in graph[model].items() if col_meta.get('label') == 'makes_up']
     new_table = Table(
@@ -146,3 +138,15 @@ def propagate(graph: Relmap, staging:bool=True):
     
     for transformation_metadata in transformations:
         graph.apply_transformation(transformation_metadata)
+
+
+
+def propagate(graph: Relmap, staging:bool=True):
+    if staging:
+        kind = 'seed'
+    else:
+        kind = 'model'
+    models = graph.get_all_tables(kind)
+    # TODO: allow multiple 
+    model = models[0]
+    propagate_single_model(graph, model)
